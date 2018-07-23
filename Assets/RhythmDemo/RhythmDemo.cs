@@ -76,6 +76,13 @@ public class RhythmDemo : MonoBehaviour {
     //
     public bool optionClicked = false;
 
+    #region R4
+    // Tracks whether the current thing to click is multiple choice group right now or not.
+    public bool isMultipleChoice;
+    private int correctChoiceCount = 0;
+    private int incorrectChoiceCount = 0;
+    #endregion
+
     // How many times buttons spawned
     public int getTotalSpawns()
     {
@@ -95,6 +102,8 @@ public class RhythmDemo : MonoBehaviour {
         totalCools = 0;
         totalMisses = 0;
         optionClicked = false;
+
+        resetChoiceCounts();
     }
 
     // empty the content
@@ -328,6 +337,9 @@ public class RhythmDemo : MonoBehaviour {
                 Debug.Log("Spawned " + fakeContent[next]);
             }
 
+            isMultipleChoice = fakeContent.Count > 0;
+
+
             newButton.GetComponent<MusicButton>().StartAnimation();
         }
 
@@ -541,6 +553,54 @@ public class RhythmDemo : MonoBehaviour {
         }
     }
 
+    #region r4
+    /// <summary>
+    /// Handle adding clicked text to the constructed story - individual button words and
+    /// words that were part of choices.
+    /// Wrong choices show as red. Correct choices show as green.
+    /// Also update the UI to show how many user got wrong and how many got right.
+    /// </summary>
+    /// <param name="newToken">String to be added</param>
+    /// <param name="isReal">Whether the choice is correct or not</param>
+    /// <param name="wasChoice">Whether the text is part of a group</param>
+    public void updateActionWithChoice(string newToken, bool isReal, bool wasChoice)
+    {
+        string[] stringSplit = actionString.Trim().Split(null);
+
+        if(!(stringSplit.Length == content.Count))
+        {
+            actionString += newToken + " ";
+            if(isReal)
+            {
+                if(wasChoice)
+                {
+                    actionText.text += "<color=\"blue\">" + newToken + "</color> ";
+                    setCorrectChoiceCount(correctChoiceCount + 1);
+                }
+                else
+                {
+                    actionText.text += newToken + " ";
+                }
+            }
+            else
+            {
+                actionText.text += "<color=\"red\">" + newToken + "</color> ";
+                setIncorrectChoiceCount(incorrectChoiceCount + 1);
+            }
+            updateChoiceCountUI();
+        }
+
+        if(contentIndex < (content.Count - 1))
+        {
+            contentIndex++;
+        }
+        else
+        {
+            contentIndex = 0;
+        }
+    }
+    #endregion
+
     // Add delta to current player score
     public void addScore(int delta)
     {
@@ -586,9 +646,14 @@ public class RhythmDemo : MonoBehaviour {
     }
 
     // Get the story, move the score to a hardcoded position on the corner (because I'm lazy), activate the gameplay, play music
-    public void startGame(RhythmCard card)
+    
+public void startGame(RhythmCard card)
     {
         iScore = 0;
+
+        // reset the correct and incorrect choice counters
+        resetChoiceCounts();
+
         targetActionString = card.getDescription();
         actionString = "";
         actionText.text = "";
@@ -605,4 +670,45 @@ public class RhythmDemo : MonoBehaviour {
         audioSource.Play();
 
     }
+
+    #region r4
+    /// <summary>
+    /// Set the correct choice counter
+    /// </summary>
+    /// <param name="newCount">The new count of correct choices</param>
+    private void setCorrectChoiceCount(int newCount)
+    {
+        correctChoiceCount = newCount;
+    }
+
+    /// <summary>
+    /// Set the correct choice counter
+    /// </summary>
+    /// <param name="newCount">The new count of incorrect choices</param>
+    private void setIncorrectChoiceCount(int newCount)
+    {
+        incorrectChoiceCount = newCount;
+    }
+
+    /// <summary>
+    /// Make the Correct/Incorrect choice counter UI show the current counts
+    /// </summary>
+    /// <param name="newCount">The count of how many to set</param>
+    private void updateChoiceCountUI()
+    {
+        GameObject.FindGameObjectWithTag("CorrectUI").GetComponent<TextMeshProUGUI>().text =
+            "Correct: " + correctChoiceCount;
+        GameObject.FindGameObjectWithTag("IncorrectUI").GetComponent<TextMeshProUGUI>().text =
+            "Incorrect: " + incorrectChoiceCount;
+    }
+   
+    /// <summary>
+    /// Set the correct incorrect choice counters to 0.
+    /// </summary>
+    public void resetChoiceCounts()
+    {
+        correctChoiceCount = 0;
+        incorrectChoiceCount = 0;
+    }
+    #endregion
 }

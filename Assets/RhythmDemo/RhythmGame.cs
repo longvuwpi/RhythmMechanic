@@ -55,5 +55,6 @@ public class RhythmGame : MonoBehaviour {
     {
         pregame.gameObject.SetActive(false);
         demoGameplay.startGame(card);
+
     }
 }

@@ -143,7 +143,9 @@ public class MusicButton : MonoBehaviour {
             float currentPerfectTime = rhythmDemo.currentPerfectTime;
 
             // put the word on the screen
-            rhythmDemo.updateAction(GetComponentInChildren<TextMeshProUGUI>().text, isRealOption);
+            //rhythmDemo.updateAction(GetComponentInChildren<TextMeshProUGUI>().text, isRealOption);
+
+            rhythmDemo.updateActionWithChoice(GetComponentInChildren<TextMeshProUGUI>().text, isRealOption, rhythmDemo.isMultipleChoice);
 
             // Figure out timing, whether it's cool or perfect
             if (((currentPerfectTime - rhythmDemo.perfect_window_half) <= clickTime) && (clickTime <= (currentPerfectTime + rhythmDemo.perfect_window_half)))

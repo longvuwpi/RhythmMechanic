@@ -6,6 +6,8 @@ TagManager:
   tags:
   - SpawnedButton
   - Clone
+  - CorrectUI
+  - IncorrectUI
   layers:
   - Default
   - TransparentFX
