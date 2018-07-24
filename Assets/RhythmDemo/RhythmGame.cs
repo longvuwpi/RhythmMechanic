@@ -1,48 +1,57 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using System;
-using System.Collections.Generic;
 
-// Manage game flow 
-public class RhythmGame : MonoBehaviour {
-    List<string> attributeNames = new List<string>() { "Money", "Plot", "Salsa"   };
-    int[] attributeValues = new int[3];
-    public TextMeshProUGUI stat;
-    public Canvas pregame;
-    public RhythmDemo demoGameplay;
-    public RhythmCardDeck cardDeck;
+/// <summary>
+/// Manages game flow.
+/// </summary>
+public class RhythmGame : MonoBehaviour
+{
+    private string[] attributeNames = new string[] { "Money", "Plot", "Salsa" };
+    private int[] attributeValues = new int[3];
 
-    int currentHighScore = 0;
+    [SerializeField]
+    private TextMeshProUGUI stat;
 
-    void Start () {
+    [SerializeField]
+    private Canvas pregame;
+
+    [SerializeField]
+    private RhythmDemo demoGameplay;
+
+    [SerializeField]
+    private RhythmCardDeck cardDeck;
+
+    private int currentHighScore = 0;
+
+    private void Start()
+    {
         // Set stat values, show main menu
         attributeValues[0] = 0;
         attributeValues[1] = 0;
         attributeValues[2] = 0;
         pregame.gameObject.SetActive(true);
-        demoGameplay.stopGame();
+        demoGameplay.StopGame();
     }
 
-    public void updateHighScore(int newScore)
+    public void UpdateHighScore(int newScore)
     {
-        if (newScore > currentHighScore)
+        if(newScore > currentHighScore)
         {
             currentHighScore = newScore;
         }
     }
 
-    public void showPregame()
+    public void ShowPregame()
     {
         pregame.gameObject.SetActive(true);
         cardDeck.DrawCards();
     }
 
-    // Update is called once per frame
-    void Update () {
+    private void Update()
+    {
         // Update the high score and stat
         string target = "";
-        for (int i = 0; i < attributeNames.Count; i++)
+        for(int i = 0; i < attributeNames.Length; i++)
         {
             target += "<sprite name=" + attributeNames[i] + "> " + attributeValues[i] + "\n";
         }
@@ -54,6 +63,6 @@ public class RhythmGame : MonoBehaviour {
     public void CardSelected(RhythmCard card)
     {
         pregame.gameObject.SetActive(false);
-        demoGameplay.startGame(card);
+        demoGameplay.StartGame(card);
     }
 }

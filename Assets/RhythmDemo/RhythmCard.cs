@@ -1,51 +1,44 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
-using System;
-using System.Collections.Generic;
 
-// Attached to card objects on the main menu
+/// <summary>
+/// Controls card objects in the main menu.
+/// </summary>
 public class RhythmCard : MonoBehaviour
 {
-    public TextMeshProUGUI eventText, outcomeText;
-    string eventString;
-    string outcomeString;
-    RhythmGame rhythmGame;
-    string descriptionString;
+    [SerializeField]
+    private TextMeshProUGUI eventText, outcomeText;
+    private string eventString;
+    private string outcomeString;
+    private RhythmGame rhythmGame;
+    private string descriptionString;
 
-    // Use this for initialization
-    void Start()
+    private void Start()
     {
         rhythmGame = FindObjectOfType<RhythmGame>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    void setEventText()
+    private void SetEventText()
     {
         eventText.text = eventString;
     }
 
-    public string getEventString()
+    public string GetEventString()
     {
         return eventString;
     }
 
-    public string getOutcomeString()
+    public string GetOutcomeString()
     {
         return outcomeString;
     }
 
-    public string getDescription()
+    public string GetDescription()
     {
         return descriptionString;
     }
 
-    void setOutcomeText()
+    private void SetOutcomeText()
     {
         string target = "";
 
@@ -53,7 +46,7 @@ public class RhythmCard : MonoBehaviour
 
         //Debug.Log("length: " + outcomeSplit.Length);
 
-        for (int i = 0; i < outcomeSplit.Length; i++)
+        for(int i = 0; i < outcomeSplit.Length; i++)
         {
             //Debug.Log(outcomeSplit[i]);
             string[] eachOutcome = outcomeSplit[i].Split('+');
@@ -63,15 +56,15 @@ public class RhythmCard : MonoBehaviour
         outcomeText.text = target;
     }
 
-    public void setContent(string content)
+    public void SetContent(string content)
     {
         string[] contentSplit = content.Split(',');
 
         eventString = contentSplit[0].Trim();
-        setEventText();
+        SetEventText();
 
         outcomeString = contentSplit[1].Trim();
-        setOutcomeText();
+        SetOutcomeText();
 
         descriptionString = contentSplit[2].Trim();
     }

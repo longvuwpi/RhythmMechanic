@@ -1517,10 +1517,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80b513e0d106bdb48b2fa0d6c39a2e22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioSource: {fileID: 148423372}
-  coolSound: {fileID: 756952602}
-  perfectSound: {fileID: 838307319}
-  missSound: {fileID: 2138870441}
+  audioSourceMusic: {fileID: 148423372}
+  audioSourceCool: {fileID: 756952602}
+  audioSourcePerfect: {fileID: 838307319}
+  audioSourceMiss: {fileID: 2138870441}
   score: {fileID: 405464805}
   actionText: {fileID: 2058908515}
   okayButton: {fileID: 1313417937}
@@ -1532,13 +1532,13 @@ MonoBehaviour:
   flashes:
   - {fileID: 550676166}
   - {fileID: 8456290}
-  timing_before: 0.6
-  timing_after: 0.4
-  perfect_window_half: 0.05
-  result_duration: 0.2
-  button_drift_duration: 1
-  score_lerp_duration: 0.5
-  eventTimes:
+  TimeBefore: 0.6
+  TimeAfter: 0.4
+  TimePerfectWindowHalf: 0.05
+  TimeShowResult: 0.2
+  TimeButtonDrift: 1
+  TimeScoreLerp: 0.5
+  TimeEvents:
   - 0.744
   - 2.222
   - 3.743
@@ -1547,14 +1547,14 @@ MonoBehaviour:
   - 8.246
   - 9.762
   - 11.215
-  currentPerfectTime: 0
-  currentPerfect: 0
-  totalPerfects: 0
-  totalCools: 0
-  totalMisses: 0
-  optionClicked: 0
-  coolScore: 5
-  perfectScore: 10
+  CurrentPerfectTime: 0
+  CurrentPerfect: 0
+  TotalPerfects: 0
+  TotalCools: 0
+  TotalMisses: 0
+  CoolScore: 5
+  PerfectScore: 10
+  OptionClicked: 0
 --- !u!1 &859946330
 GameObject:
   m_ObjectHideFlags: 0
@@ -2003,7 +2003,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 852747757}
-        m_MethodName: stopGame
+        m_MethodName: StopGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// Pull data from spreadsheet, populate card deck, draw random cards for player to choose from
-public class RhythmCardDeck : MonoBehaviour {
-    List<string> cardStrings;
-    List<GameObject> cards = new List<GameObject> ();
-    public GameObject cardPrefab;
+/// <summary>
+/// Pulls data from a spreadsheet and uses it to populate the deck of cards.
+/// Draws random cards for the player to choose from.
+/// </summary>
+public class RhythmCardDeck : MonoBehaviour
+{
+    private List<string> cardStrings;
+    private List<GameObject> cards = new List<GameObject>();
 
-    // Use this for initialization
-    void Start () {
+    [SerializeField]
+    private GameObject cardPrefab;
+
+    private void Start()
+    {
         StartCoroutine(GetEventsFromSpreadsheet());
 
         // create 4 placeholder cards
-        for (int i = 0; i < 4; i++)
+        for(int i = 0; i < 4; i++)
         {
             GameObject card = Instantiate(cardPrefab);
             card.gameObject.transform.SetParent(gameObject.transform.parent);
@@ -31,7 +37,7 @@ public class RhythmCardDeck : MonoBehaviour {
     {
         UnityWebRequest wr = UnityWebRequest.Get("https://docs.google.com/spreadsheets/d/1IPKzyXYkCehmvdp1zJx6S9GUlyYXkVZNKGaPzu5k_3o/export?format=csv");
         yield return wr.SendWebRequest();
-        while (!wr.downloadHandler.isDone)
+        while(!wr.downloadHandler.isDone)
         {
             yield return null;
         }
@@ -55,27 +61,22 @@ public class RhythmCardDeck : MonoBehaviour {
 
         List<int> randomedCards = new List<int>();
 
-        if (cardStrings != null)
+        if(cardStrings != null)
         {
-            while (randomedCards.Count < 4)
+            while(randomedCards.Count < 4)
             {
                 int randomCard = rd.Next(cardStrings.Count);
-                if (!randomedCards.Contains(randomCard))
+                if(!randomedCards.Contains(randomCard))
                 {
                     randomedCards.Add(randomCard);
                 }
             }
 
             // Put the contents in the placeholder cards
-            for (int i = 0; i < cards.Count; i++)
+            for(int i = 0; i < cards.Count; i++)
             {
-                cards[i].GetComponent<RhythmCard>().setContent(cardStrings[randomedCards[i]]);
+                cards[i].GetComponent<RhythmCard>().SetContent(cardStrings[randomedCards[i]]);
             }
         }
     }
-
-    // Update is called once per frame
-    void Update () {
-		
-	}
 }

@@ -3,84 +3,99 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// UI Particle System
+/// Controls particle effects in the UI.
 /// </summary>
-public class UIParticleSystem : MonoBehaviour {
-
+public class UIParticleSystem : MonoBehaviour
+{
     /// <summary>
     /// Particle Image
     /// </summary>
-    public Sprite Particle;
+    [SerializeField]
+    private Sprite particle;
 
     /// <summary>
     /// Play Duration
     /// </summary>
-    public float Duration = 5f;
+    [SerializeField]
+    private float duration;
 
     /// <summary>
     /// Loop Emission
     /// </summary>
-    public bool Looping = true;
+    [SerializeField]
+    private bool looping;
 
     /// <summary>
     /// Play Lifetime (if not loopable)
     /// </summary>
-    public float Lifetime = 5f;
+    [SerializeField]
+    private float lifetime;
 
     /// <summary>
     /// Particle Emission Speed
     /// </summary>
-    public float Speed = 5f;
+    [SerializeField]
+    public float Speed;
 
     /// <summary>
     /// Particle Size (will be multiplied with the size over lifetime)
     /// </summary>
-    public float Size = 1f;
+    [SerializeField]
+    private float size;
 
     /// <summary>
     /// Particle Rotation per Second
     /// </summary>
-    public float Rotation = 0f;
+    [SerializeField]
+    private float rotation;
 
     /// <summary>
     /// Play Particle Effect On Awake
     /// </summary>
-    public bool PlayOnAwake = true;
+    [SerializeField]
+    private bool playOnAwake;
 
     /// <summary>
     /// Gravity
     /// </summary>
-    public float Gravity = -9.81f;
+    [SerializeField]
+    private float gravity;
 
     /// <summary>
     /// Emission Per Second
     /// </summary>
-    public float EmissionsPerSecond = 10f;
+    [SerializeField]
+    private float emissionsPerSecond;
 
     /// <summary>
     /// Initial Direction
     /// </summary>
-    public Vector2 EmissionDirection = new Vector2(0,1f);
+    [SerializeField]
+    private Vector2 emissionDirection = new Vector2(0, 1f);
 
     /// <summary>
     /// Random Range where particles are emitted
     /// </summary>
-    public float EmissionAngle = 90f;
+    [SerializeField]
+    private float emissionAngle;
 
     /// <summary>
     /// Color Over Lifetime
     /// </summary>
-    public Gradient ColorOverLifetime;
+    [SerializeField]
+    private Gradient colorOverLifetime;
 
     /// <summary>
     /// Size Over Lifetime
     /// </summary>
-    public AnimationCurve SizeOverLifetime;
+    [SerializeField]
+    private AnimationCurve sizeOverLifetime;
 
     /// <summary>
     /// Speed Over Lifetime
     /// </summary>
-    public AnimationCurve SpeedOverLifetime;
+    [SerializeField]
+    private AnimationCurve speedOverLifetime;
 
     [HideInInspector]
     public bool IsPlaying { get; protected set; }
@@ -90,23 +105,24 @@ public class UIParticleSystem : MonoBehaviour {
     protected int ParticlePoolPointer;
 
 
-	// Use this for initialization
-	void Start () {    
+    // Use this for initialization
+    void Start()
+    {
     }
 
     void Awake()
     {
-        if (ParticlePool == null)
+        if(ParticlePool == null)
             Init();
-        if (PlayOnAwake)
+        if(playOnAwake)
             Play();
     }
 
     private void Init()
     {
         ParticlePoolPointer = 0;
-        ParticlePool = new Image[(int)(Lifetime * EmissionsPerSecond * 1.1f + 1)];
-        for (int i = 0; i < ParticlePool.Length; i++)
+        ParticlePool = new Image[(int)(lifetime * emissionsPerSecond * 1.1f + 1)];
+        for(int i = 0; i < ParticlePool.Length; i++)
         {
 
             var gameObject = new GameObject("Particle");
@@ -115,14 +131,15 @@ public class UIParticleSystem : MonoBehaviour {
             ParticlePool[i] = gameObject.AddComponent<Image>();
             ParticlePool[i].transform.localRotation = Quaternion.identity;
             ParticlePool[i].transform.localPosition = Vector3.zero;
-            ParticlePool[i].sprite = Particle;
+            ParticlePool[i].sprite = particle;
         }
     }
 
     // Update is called once per frame
-    void Update () {
-		
-	}
+    void Update()
+    {
+
+    }
 
     public void Play()
     {
@@ -134,18 +151,18 @@ public class UIParticleSystem : MonoBehaviour {
     {
         Playtime = 0f;
         var particleTimer = 0f;
-        while (IsPlaying && (Playtime < Duration || Looping))
+        while(IsPlaying && (Playtime < duration || looping))
         {
             Playtime += Time.deltaTime;
             particleTimer += Time.deltaTime;
-            while (particleTimer > 1f / EmissionsPerSecond)
+            while(particleTimer > 1f / emissionsPerSecond)
             {
-                particleTimer -= 1f / EmissionsPerSecond;
+                particleTimer -= 1f / emissionsPerSecond;
                 ParticlePoolPointer = (ParticlePoolPointer + 1) % ParticlePool.Length;
                 if(!ParticlePool[ParticlePool.Length - 1 - ParticlePoolPointer].gameObject.activeSelf)
                     StartCoroutine(CoParticleFly(ParticlePool[ParticlePool.Length - 1 - ParticlePoolPointer]));
             }
-            
+
             yield return new WaitForEndOfFrame();
         }
         IsPlaying = false;
@@ -158,32 +175,32 @@ public class UIParticleSystem : MonoBehaviour {
         var particleLifetime = 0f;
 
         //get default velocity
-        var emissonAngle = new Vector3(EmissionDirection.x,EmissionDirection.y,0f);
+        var emissonAngle = new Vector3(emissionDirection.x, emissionDirection.y, 0f);
         //apply angle
-        emissonAngle = Quaternion.AngleAxis(Random.Range(-EmissionAngle / 2f, EmissionAngle / 2f), Vector3.forward) * emissonAngle;
+        emissonAngle = Quaternion.AngleAxis(Random.Range(-emissionAngle / 2f, emissionAngle / 2f), Vector3.forward) * emissonAngle;
         //normalize
         emissonAngle.Normalize();
 
         var gravityForce = Vector3.zero;
 
-        while (particleLifetime < Lifetime)
+        while(particleLifetime < lifetime)
         {
             particleLifetime += Time.deltaTime;
 
             //apply gravity
-            gravityForce = Vector3.up * Gravity * particleLifetime;
+            gravityForce = Vector3.up * gravity * particleLifetime;
 
             //set position
-            particle.transform.position += emissonAngle * SpeedOverLifetime.Evaluate(particleLifetime / Lifetime) * Speed + gravityForce;
+            particle.transform.position += emissonAngle * speedOverLifetime.Evaluate(particleLifetime / lifetime) * Speed + gravityForce;
 
             //set scale
-            particle.transform.localScale = Vector3.one * SizeOverLifetime.Evaluate(particleLifetime / Lifetime) * Size;
+            particle.transform.localScale = Vector3.one * sizeOverLifetime.Evaluate(particleLifetime / lifetime) * size;
 
             //set rortaion
-            particle.transform.localRotation = Quaternion.AngleAxis(Rotation * particleLifetime, Vector3.forward);
+            particle.transform.localRotation = Quaternion.AngleAxis(rotation * particleLifetime, Vector3.forward);
 
             //set color
-            particle.color = ColorOverLifetime.Evaluate(particleLifetime / Lifetime);
+            particle.color = colorOverLifetime.Evaluate(particleLifetime / lifetime);
 
             yield return new WaitForEndOfFrame();
         }

@@ -4,101 +4,192 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Responsible for the rhythm gameplay
-// Probably needs nonserialized tags on things that are not set in the inspector, since it's a mess now
-public class RhythmDemo : MonoBehaviour {
-    // game music, sound effect for cool, perfect, miss
-    public AudioSource audioSource, coolSound, perfectSound, missSound;
-    
-    // text display for score, and the story
-    public TextMeshProUGUI score, actionText;
-    
-    // it is what it is
-    // hit it when rhythm game's over to go back to main screen
-    public Button okayButton;
+/// <summary>
+/// Responsible for rhythm-based gameplay.
+/// Contains timing settings that are initialized in the script, not the Inspector.
+/// </summary>
+/// <remarks>
+/// The comment above this class indicated that the timing settings should be nonserialized, so I made that change.
+/// Note that for some variables, the initializing value in the script differed from the value in the Inspector.
+/// In order to avoid changing the gameplay, I changed the values in the script to match those in the Inspector,
+/// since the values in the Inspector were overriding the script anyway.
+/// --Matt
+/// </remarks>
+public class RhythmDemo : MonoBehaviour
+{
+    /// <summary>
+    /// AudioSource for music.
+    /// </summary>
+    public AudioSource audioSourceMusic;
 
-    // shrinking bounding box 
+    /// <summary>
+    /// AudioSource for sound effect that plays when the player's button-press timing earns a rank of "cool."
+    /// </summary>
+    public AudioSource audioSourceCool;
+
+    /// <summary>
+    /// AudioSource for sound effect that plays when the player's button-press timing earns a rank of "perfect."
+    /// </summary>
+    public AudioSource audioSourcePerfect;
+
+    /// <summary>
+    /// AudioSource for sound effect that plays when the player's button-press timing earns a rank of "miss."
+    /// </summary>
+    public AudioSource audioSourceMiss;
+
+    /// <summary>
+    /// Text object that displays the player's score.
+    /// </summary>
+    [SerializeField]
+    private TextMeshProUGUI score;
+
+    /// <summary>
+    /// Text object that displays the story.
+    /// </summary>
+    [SerializeField]
+    private TextMeshProUGUI actionText;
+
+    /// <summary>
+    /// Button that returns the player to the menu.
+    /// </summary>
+    [SerializeField]
+    private Button okayButton;
+
+    /// <summary>
+    /// The shrinking bounding box that represents ideal button-press timing.
+    /// </summary>
     public GameObject boundingBox;
 
-    // Perfect! || Cool! || Miss
+    /// <summary>
+    /// Text object that indicates the accuracy of a player's button-press timing.
+    /// Button-press timing accuracy is divided into the following categories: cool, perfect, and miss.
+    /// </summary>
     public TextMeshProUGUI clickResult;
 
-    public GameObject buttonPrefab;
+    /// <summary>
+    /// Prefab for a button that the player must attempt to press with perfect timing.
+    /// </summary>
+    [SerializeField]
+    private GameObject buttonPrefab;
 
-    // Not really explosion but some silly image
-    public Image explosion;
+    /// <summary>
+    /// Image that serves as a visual effect for when a button is pressed.
+    /// </summary>
+    [SerializeField]
+    private Image explosion;
 
-    // particle effects
-    public UIParticleSystem[] flashes;
+    /// <summary>
+    /// Array of available particle effects.
+    /// </summary>
+    [SerializeField]
+    private UIParticleSystem[] flashes;
 
-    // to compare to the current play time to see if the track just looped
-    float lastPlaytime = 0;
-    // how many time the song looped
-    int loopTime = 0;
+    /// <summary>
+    /// Used to check if the track just looped.
+    /// </summary>
+    private float lastPlaytime = 0;
 
-    // messed up naming convention from somewhere, it's the player's score as an int
-    int iScore = 0;
+    /// <summary>
+    /// The number of times the song has looped.
+    /// </summary>
+    private int loopTime = 0;
 
-    string actionString = "";
-    string targetActionString = "";
+    /// <summary>
+    /// The player's current score.
+    /// </summary>
+    private int playerScore = 0;
 
-    System.Random rd = new System.Random();
+    /// <summary>
+    /// The string containing the story that the player has assembled by playing the game.
+    /// </summary>
+    private string actionString = "";
 
-    //Timings
-    public float timing_before = 0.6f;
-    public float timing_after = 0.3f;
-    public float perfect_window_half = 0.05f;
-    public float result_duration = 0.2f; //  Perfect! || Cool! || Miss
-    public float button_drift_duration = 0.8f;
-    public float score_lerp_duration = 0.3f;
-    public float[] eventTimes = new float[] { 0.744f, 2.222f, 3.743f, 5.247f, 6.743f, 8.246f, 9.762f, 11.215f };
-    //public float[] eventsTime = new float[] { 0.75f, 2.25f, 3.75f, 5.25f, 6.75f, 8.25f, 9.75f, 11.25f,
-    //                                          12.75f, 14.25f, 15.75f, 17.25f, 18.75f, 20.25f, 21.75f, 23.25f,
-    //                                          24.75f, 26.25f, 27.75f, 29.25f, 30.75f, 32.25f, 33.75f, 35.25f};
+    /// <summary>
+    /// The string containing the story that the player must assemble by playing the game.
+    /// </summary>
+    private string targetActionString = "";
 
-    //To run through eventsTime
-    int eventIndex = 0;
+    /// <summary>
+    /// A <c>Random</c> object used to generate random values.
+    /// </summary>
+    private System.Random rd = new System.Random();
 
-    public float currentPerfectTime = 0;
+    [HideInInspector]
+    public float TimeBefore = 0.6f;
+
+    [HideInInspector]
+    public float TimeAfter = 0.4f;
+
+    [HideInInspector]
+    public float TimePerfectWindowHalf = 0.05f;
+
+    [HideInInspector]
+    public float TimeShowResult = 0.2f;
+
+    [HideInInspector]
+    public float TimeButtonDrift = 1f;
+
+    [HideInInspector]
+    public float TimeScoreLerp = 0.5f;
+
+    [HideInInspector]
+    public float[] TimeEvents = new float[] { 0.744f, 2.222f, 3.743f, 5.247f, 6.743f, 8.246f, 9.762f, 11.215f };
+
+    // To run through eventsTime
+    private int eventIndex = 0;
+
+    [HideInInspector]
+    public float CurrentPerfectTime;
 
     //Phrases for each button
-    List<string> content = new List<string>();
-    int contentIndex = 0;
+    private List<string> content = new List<string>();
+    private int contentIndex = 0;
 
     // Score related
-    public int currentPerfect = 0;
-    public int totalPerfects;
-    public int totalCools;
-    public int totalMisses;
-    public int coolScore = 5;
-    public int perfectScore = 10;
+    [HideInInspector]
+    public int CurrentPerfect;
 
-    //
-    public bool optionClicked = false;
+    [HideInInspector]
+    public int TotalPerfects;
+
+    [HideInInspector]
+    public int TotalCools;
+
+    [HideInInspector]
+    public int TotalMisses;
+
+    [HideInInspector]
+    public int CoolScore = 5;
+
+    [HideInInspector]
+    public int PerfectScore = 10;
+
+    [HideInInspector]
+    public bool OptionClicked = false;
 
     // How many times buttons spawned
-    public int getTotalSpawns()
+    public int GetTotalSpawns()
     {
-        return (totalCools + totalMisses + totalPerfects);
+        return (TotalCools + TotalMisses + TotalPerfects);
     }
 
     // Get the story of the event, split it, put it in the array, reset variables
-    public void setContent(string eventDescription)
+    public void SetContent(string eventDescription)
     {
         string[] contentSplit = eventDescription.Split(null);
         List<string> newContent = new List<string>(contentSplit);
 
         content.AddRange(newContent);
         contentIndex = 0;
-        currentPerfect = 0;
-        totalPerfects = 0;
-        totalCools = 0;
-        totalMisses = 0;
-        optionClicked = false;
+        CurrentPerfect = 0;
+        TotalPerfects = 0;
+        TotalCools = 0;
+        TotalMisses = 0;
+        OptionClicked = false;
     }
 
     // empty the content
-    public void removeContent()
+    public void RemoveContent()
     {
         content = new List<string>();
     }
@@ -107,41 +198,41 @@ public class RhythmDemo : MonoBehaviour {
     // It doesn't reset Perfect combo because
     public void ButtonMissed()
     {
-        totalMisses++;
+        TotalMisses++;
     }
 
     // Score for perfect
     public void ButtonScoredPerfect()
     {
-        totalPerfects++;
+        TotalPerfects++;
 
         //Increment perfect combo
-        currentPerfect++;
+        CurrentPerfect++;
 
-        addScore(perfectScore * currentPerfect);
+        AddScore(PerfectScore * CurrentPerfect);
     }
 
     // Score for cool
     public void ButtonScoredCool()
     {
-        totalCools++;
+        TotalCools++;
 
-        addScore(coolScore);
+        AddScore(CoolScore);
 
         // Reset perfect combo
-        currentPerfect = 0;
+        CurrentPerfect = 0;
     }
 
     // Update is called once per frame
     // Gotta put this logic into Update() with the way this works
-    void Update()
+    private void Update()
     {
-        if (audioSource.isPlaying)
+        if(audioSourceMusic.isPlaying)
         {
-            float playTime = audioSource.time;
+            float playTime = audioSourceMusic.time;
 
             //Figure out if the song just looped
-            if (playTime < lastPlaytime)
+            if(playTime < lastPlaytime)
             {
                 loopTime++;
             }
@@ -149,37 +240,37 @@ public class RhythmDemo : MonoBehaviour {
             lastPlaytime = playTime;
 
             //Display the score
-            score.text = iScore.ToString();
+            score.text = playerScore.ToString();
 
             // Stop the game if
-            if (loopTime > 4)
+            if(loopTime > 4)
             {
                 // put down the volume, remove everything, show the okay button, show score
-                audioSource.volume = 0.6f;
+                audioSourceMusic.volume = 0.6f;
 
                 RemoveSpawnedButtons();
 
-                removeContent();
+                RemoveContent();
                 okayButton.gameObject.SetActive(true);
                 score.gameObject.transform.localPosition = new Vector3(0, 0, 0);
             }
             else
             {
                 // for what
-                float length = audioSource.clip.length;
+                float length = audioSourceMusic.clip.length;
 
                 //Debug.Log("event index " + eventIndex);
-                float currentEvent = eventTimes[eventIndex];
+                float currentEvent = TimeEvents[eventIndex];
 
                 // if it's getting near the current event time, removed spawned buttons and spawn new ones
-                if ((playTime > (currentEvent - timing_before)) && (playTime < currentEvent))
+                if((playTime > (currentEvent - TimeBefore)) && (playTime < currentEvent))
                 {
                     RemoveSpawnedButtons();
 
-                    currentPerfectTime = currentEvent;
+                    CurrentPerfectTime = currentEvent;
 
                     // move to next event in the song (not next content)
-                    if (eventIndex >= (eventTimes.Length - 1))
+                    if(eventIndex >= (TimeEvents.Length - 1))
                     {
                         eventIndex = 0;
                     }
@@ -197,12 +288,12 @@ public class RhythmDemo : MonoBehaviour {
     }
 
     // It does what it says
-    void RemoveSpawnedButtons()
+    private void RemoveSpawnedButtons()
     {
         GameObject[] spawned = GameObject.FindGameObjectsWithTag("SpawnedButton");
-        if (spawned.Length > 0)
+        if(spawned.Length > 0)
         {
-            foreach (GameObject eachSpawned in spawned)
+            foreach(GameObject eachSpawned in spawned)
             {
                 Destroy(eachSpawned);
             }
@@ -210,10 +301,10 @@ public class RhythmDemo : MonoBehaviour {
     }
 
     // Also does what it says
-    void SpawnButtons()
+    private void SpawnButtons()
     {
         //Reset this attribute. Means that no button is clicked yet
-        optionClicked = false;
+        OptionClicked = false;
 
         // To store randomized positions of buttons
         List<Vector3> buttonPositions = new List<Vector3>();
@@ -235,7 +326,7 @@ public class RhythmDemo : MonoBehaviour {
         // multiple choices
         // first choice is correct, others are incorrect (fake)
         // idk what I was smoking when I did all this naming, was a while ago
-        if (content[contentIndex].Contains("/"))
+        if(content[contentIndex].Contains("/"))
         {
             string[] options = content[contentIndex].Split('/');
 
@@ -243,21 +334,22 @@ public class RhythmDemo : MonoBehaviour {
             realChoices.Add(options[0]);
 
             // other choices are incorrect
-            foreach (string option in options)
+            foreach(string option in options)
             {
-                if (!realChoices.Contains(option))
+                if(!realChoices.Contains(option))
                 {
                     fakeContent.Add(option);
                 }
             }
 
             // have to change the currentPerfectTime and increment the event index, since if it's a multiple-choice it lasts twice as long
-            currentPerfectTime = eventTimes[eventIndex];
-            
-            if (eventIndex >= (eventTimes.Length - 1))
+            CurrentPerfectTime = TimeEvents[eventIndex];
+
+            if(eventIndex >= (TimeEvents.Length - 1))
             {
                 eventIndex = 0;
-            } else
+            }
+            else
             {
                 eventIndex++;
             }
@@ -273,16 +365,16 @@ public class RhythmDemo : MonoBehaviour {
         int numFakes = fakeContent.Count;
 
         // if there are fake choices
-        if (numFakes > 0)
+        if(numFakes > 0)
         {
-            for (int i = 1; i <= numFakes; i++)
+            for(int i = 1; i <= numFakes; i++)
             {
                 // fake choices also have randomized positions, but has to be far enough from all the previous choices
                 bool farEnough = false;
                 int fakeRdX, fakeRdY;
-                Vector3 fakePosition = new Vector3(0,0,0);
-                
-                while (!farEnough)
+                Vector3 fakePosition = new Vector3(0, 0, 0);
+
+                while(!farEnough)
                 {
                     farEnough = true;
 
@@ -290,7 +382,7 @@ public class RhythmDemo : MonoBehaviour {
                     fakeRdY = rd.Next(-180, 180);
                     fakePosition = new Vector3(fakeRdX, fakeRdY, 0);
 
-                    foreach (Vector3 eachPos in buttonPositions)
+                    foreach(Vector3 eachPos in buttonPositions)
                     {
                         farEnough &= (Vector3.Distance(eachPos, fakePosition) > 280);
                     }
@@ -302,7 +394,7 @@ public class RhythmDemo : MonoBehaviour {
         }
 
         // Create all buttons
-        for (int i = 0; i < buttonPositions.Count; i++)
+        for(int i = 0; i < buttonPositions.Count; i++)
         {
             GameObject newButton = Instantiate(buttonPrefab);
             newButton.transform.SetParent(gameObject.transform);
@@ -313,11 +405,11 @@ public class RhythmDemo : MonoBehaviour {
             newButton.GetComponent<MusicButton>().SetRhythmDemo(this);
 
             // real choice
-            if (i < numReals)
+            if(i < numReals)
             {
                 newButton.GetComponent<MusicButton>().SetTerm(realChoices[i], true);
                 // this is only used for the first button
-                GetComponentInChildren<TutorialController>().setButton(newButton.GetComponent<MusicButton>());
+                GetComponentInChildren<TutorialController>().SetButton(newButton.GetComponent<MusicButton>());
                 Debug.Log("Spawned " + realChoices[i]);
             }
             // fake choice
@@ -343,7 +435,7 @@ public class RhythmDemo : MonoBehaviour {
     public void Cool(MusicButton musicButton)
     {
         // destroy particle effects if any left
-        foreach (GameObject clone in GameObject.FindGameObjectsWithTag("Clone"))
+        foreach(GameObject clone in GameObject.FindGameObjectsWithTag("Clone"))
         {
             Destroy(clone);
         }
@@ -365,13 +457,13 @@ public class RhythmDemo : MonoBehaviour {
     // called when player perfects
     public void Perfect(MusicButton musicButton)
     {
-        foreach (GameObject clone in GameObject.FindGameObjectsWithTag("Clone"))
+        foreach(GameObject clone in GameObject.FindGameObjectsWithTag("Clone"))
         {
             Destroy(clone);
         }
 
         // set up more shitty particle effects
-        foreach (UIParticleSystem flash in flashes)
+        foreach(UIParticleSystem flash in flashes)
         {
             UIParticleSystem flashClone = Instantiate(flash);
             flashClone.gameObject.transform.SetParent(this.gameObject.transform);
@@ -403,15 +495,15 @@ public class RhythmDemo : MonoBehaviour {
         clickResult.color = Color.magenta;
 
         // It lerps
-        float startTime = audioSource.time;
-        float totalTime = result_duration;
-        missSound.Play();
-        float perc = (audioSource.time - startTime) / totalTime;
-        while (perc < 1)
+        float startTime = audioSourceMusic.time;
+        float totalTime = TimeShowResult;
+        audioSourceMiss.Play();
+        float perc = (audioSourceMusic.time - startTime) / totalTime;
+        while(perc < 1)
         {
             Vector3 currentScale = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(1.5f, 1.5f, 1), perc);
             clickResult.gameObject.transform.localScale = currentScale;
-            perc = (audioSource.time - startTime) / totalTime;
+            perc = (audioSourceMusic.time - startTime) / totalTime;
             yield return null;
         }
 
@@ -435,25 +527,25 @@ public class RhythmDemo : MonoBehaviour {
         explosion.gameObject.transform.SetAsLastSibling();
         string target = "Perfect!";
         // Perfect combo
-        if (currentPerfect > 1)
+        if(CurrentPerfect > 1)
         {
-            target += "<color=\"red\">x" + currentPerfect.ToString();
+            target += "<color=\"red\">x" + CurrentPerfect.ToString();
         }
 
         // Higher the combo, higher the pitch of the sound
-        float newPitch = Mathf.Clamp(1 + (0.06f * (currentPerfect - 1)), 1, 1.8f);
-        perfectSound.pitch = newPitch;
+        float newPitch = Mathf.Clamp(1 + (0.06f * (CurrentPerfect - 1)), 1, 1.8f);
+        audioSourcePerfect.pitch = newPitch;
 
         clickResult.text = target;
         clickResult.color = new Color(1, 0, 0.59f);
 
         // It also lerps
-        float startTime = audioSource.time;
-        float totalTime = result_duration;
-        perfectSound.Play();
-        float perc = (audioSource.time - startTime) / totalTime;
+        float startTime = audioSourceMusic.time;
+        float totalTime = TimeShowResult;
+        audioSourcePerfect.Play();
+        float perc = (audioSourceMusic.time - startTime) / totalTime;
 
-        while (perc < 1)
+        while(perc < 1)
         {
             Vector3 currentScale = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(1.5f, 1.5f, 1), perc);
             clickResult.gameObject.transform.localScale = currentScale;
@@ -462,7 +554,7 @@ public class RhythmDemo : MonoBehaviour {
             explosion.gameObject.transform.localScale = Vector3.Lerp(new Vector3(1, 1, 1), new Vector3(1.5f, 1.5f, 1.5f), perc);
             //explosion.gameObject.transform.localScale = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(1.5f, 1.5f, 1.5f), perc);
 
-            perc = (audioSource.time - startTime) / totalTime;
+            perc = (audioSourceMusic.time - startTime) / totalTime;
             yield return null;
         }
 
@@ -489,12 +581,12 @@ public class RhythmDemo : MonoBehaviour {
         clickResult.color = Color.green;
 
         // It also lerps
-        float startTime = audioSource.time;
-        float totalTime = result_duration;
-        coolSound.Play();
-        float perc = (audioSource.time - startTime) / totalTime;
+        float startTime = audioSourceMusic.time;
+        float totalTime = TimeShowResult;
+        audioSourceCool.Play();
+        float perc = (audioSourceMusic.time - startTime) / totalTime;
 
-        while (perc < 1)
+        while(perc < 1)
         {
             Vector3 currentScale = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(1, 1, 1), perc);
             clickResult.gameObject.transform.localScale = currentScale;
@@ -503,7 +595,7 @@ public class RhythmDemo : MonoBehaviour {
             explosion.gameObject.transform.localScale = Vector3.Lerp(new Vector3(1, 1, 1), new Vector3(1.5f, 1.5f, 1.5f), perc);
             //explosion.gameObject.transform.localScale = Vector3.Lerp(new Vector3(0, 0, 0), new Vector3(1.5f, 1.5f, 1.5f), perc);
 
-            perc = (audioSource.time - startTime) / totalTime;
+            perc = (audioSourceMusic.time - startTime) / totalTime;
             yield return null;
         }
 
@@ -514,14 +606,14 @@ public class RhythmDemo : MonoBehaviour {
     }
 
     // Add the clicked text to the constructed story
-    public void updateAction(string newToken, bool isReal)
+    public void UpdateAction(string newToken, bool isReal)
     {
         string[] stringSplit = actionString.Trim().Split(null);
 
-        if (!(stringSplit.Length == content.Count))
+        if(!(stringSplit.Length == content.Count))
         {
             actionString += newToken + " ";
-            if (isReal)
+            if(isReal)
             {
                 actionText.text += newToken + " ";
             }
@@ -531,7 +623,7 @@ public class RhythmDemo : MonoBehaviour {
             }
         }
 
-        if (contentIndex < (content.Count - 1))
+        if(contentIndex < (content.Count - 1))
         {
             contentIndex++;
         }
@@ -542,7 +634,7 @@ public class RhythmDemo : MonoBehaviour {
     }
 
     // Add delta to current player score
-    public void addScore(int delta)
+    public void AddScore(int delta)
     {
         StartCoroutine(LerpScore(delta));
     }
@@ -550,46 +642,46 @@ public class RhythmDemo : MonoBehaviour {
     // It has to lerp
     IEnumerator LerpScore(int delta)
     {
-        float startTime = audioSource.time;
+        float startTime = audioSourceMusic.time;
 
         float length = 0;
 
-        int oldScore = iScore;
-        int targetScore = iScore + delta;
+        int oldScore = playerScore;
+        int targetScore = playerScore + delta;
 
         score.gameObject.transform.localScale = new Vector3(1.5f, 1.5f, 1);
-        while (length < score_lerp_duration)
+        while(length < TimeScoreLerp)
         {
-            length = audioSource.time - startTime;
-            float perc = length / score_lerp_duration;
+            length = audioSourceMusic.time - startTime;
+            float perc = length / TimeScoreLerp;
             int currentScore = (int)Mathf.Lerp(oldScore, targetScore, perc);
-            iScore = currentScore;
+            playerScore = currentScore;
 
             score.gameObject.transform.localScale = Vector3.Lerp(new Vector3(1.5f, 1.5f, 1), new Vector3(2, 2, 1), perc);
             yield return null;
         }
 
-        iScore = targetScore;
+        playerScore = targetScore;
 
         yield return new WaitForSeconds(0.5f);
         score.gameObject.transform.localScale = new Vector3(1, 1, 1);
     }
 
     // Stop song, reset some variables, show main menu
-    public void stopGame()
+    public void StopGame()
     {
         gameObject.SetActive(false);
         loopTime = 0;
-        audioSource.Stop();
-        GetComponentInParent<RhythmGame>().updateHighScore(iScore);
-        GetComponentInParent<RhythmGame>().showPregame();
+        audioSourceMusic.Stop();
+        GetComponentInParent<RhythmGame>().UpdateHighScore(playerScore);
+        GetComponentInParent<RhythmGame>().ShowPregame();
     }
 
     // Get the story, move the score to a hardcoded position on the corner (because I'm lazy), activate the gameplay, play music
-    public void startGame(RhythmCard card)
+    public void StartGame(RhythmCard card)
     {
-        iScore = 0;
-        targetActionString = card.getDescription();
+        playerScore = 0;
+        targetActionString = card.GetDescription();
         actionString = "";
         actionText.text = "";
 
@@ -599,10 +691,10 @@ public class RhythmDemo : MonoBehaviour {
 
         gameObject.SetActive(true);
 
-        setContent(targetActionString);
+        SetContent(targetActionString);
 
-        audioSource.volume = 1;
-        audioSource.Play();
+        audioSourceMusic.volume = 1;
+        audioSourceMusic.Play();
 
     }
 }
