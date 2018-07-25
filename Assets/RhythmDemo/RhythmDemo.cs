@@ -171,6 +171,8 @@ public class RhythmDemo : MonoBehaviour {
                 removeContent();
                 okayButton.gameObject.SetActive(true);
                 score.gameObject.transform.localPosition = new Vector3(0, 0, 0);
+
+
             }
             else
             {
@@ -642,6 +644,7 @@ public class RhythmDemo : MonoBehaviour {
         loopTime = 0;
         audioSource.Stop();
         GetComponentInParent<RhythmGame>().updateHighScore(iScore);
+        GetComponentInParent<RhythmGame>().updateValues();
         GetComponentInParent<RhythmGame>().showPregame();
     }
 

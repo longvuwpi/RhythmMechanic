@@ -9,7 +9,7 @@ public class RhythmCard : MonoBehaviour
 {
     public TextMeshProUGUI eventText, outcomeText;
     string eventString;
-    string outcomeString;
+    public string outcomeString;
     RhythmGame rhythmGame;
     string descriptionString;
 

@@ -13,6 +13,8 @@ public class RhythmGame : MonoBehaviour {
     public RhythmDemo demoGameplay;
     public RhythmCardDeck cardDeck;
 
+    private RhythmCard selectedCard;
+
     int currentHighScore = 0;
 
     void Start () {
@@ -29,6 +31,33 @@ public class RhythmGame : MonoBehaviour {
         if (newScore > currentHighScore)
         {
             currentHighScore = newScore;
+        }
+    }
+
+    public void updateValues()
+    {
+        if(selectedCard != null)
+        {
+            string values = selectedCard.outcomeString;
+            string[] valArr = values.Split(' ');
+            foreach(string s in valArr)
+            {
+                string[] newArr = s.Split('+');
+                switch(newArr[0])
+                {
+                    case "Money":
+                        attributeValues[0] += int.Parse(newArr[1]);
+                        break;
+                    case "Plot":
+                        attributeValues[1] += int.Parse(newArr[1]);
+                        break;
+                    case "Salsa":
+                        attributeValues[2] += int.Parse(newArr[1]);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -56,5 +85,6 @@ public class RhythmGame : MonoBehaviour {
         pregame.gameObject.SetActive(false);
         demoGameplay.startGame(card);
 
+        selectedCard = card;
     }
 }
